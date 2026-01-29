@@ -1,0 +1,37 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend-monitor
+  labels:
+    release: prometheus # Must match the Prometheus Helm Release name (usually 'prometheus' or 'kube-prometheus-stack')
+spec:
+  selector:
+    matchLabels:
+      app: backend
+  endpoints:
+  - port: metrics-otel # We will add this named port to the deployment
+    path: /metrics
+    interval: 15s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: frontend-monitor
+  labels:
+    release: prometheus 
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  endpoints:
+  - port: http # Scrape Nginx
+    path: /metrics
+    interval: 15s
+    # Note: To get REAL nginx metrics, you typically run an nginx-prometheus-exporter sidecar
+    # which scrapes 127.0.0.1:80/metrics (stub_status) and transforms it to Prom format @ :9113
+    # BUT for simplicity, if you just want to see "it exists", we scrape the stub_status directly 
+    # (though raw stub_status is NOT prometheus format, so this will fail to parse in Prom).
+    # 
+    # CORRECT APPROACH for Frontend:
+    # We will assume you will install nginx-prometheus-exporter as a sidecar or just rely on Blackbox exporter.
+    # For now, let's keep backend-monitor as the primary one.

@@ -1,3 +1,4 @@
+require("./instrumentation"); // OpenTelemetry Setup MUST be first
 require("dotenv").config();
 const express = require("express");
 const bcrypt = require("bcryptjs");

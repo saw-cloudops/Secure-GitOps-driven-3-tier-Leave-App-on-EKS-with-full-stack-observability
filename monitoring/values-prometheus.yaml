@@ -1,0 +1,32 @@
+alertmanager:
+  config:
+    global:
+      smtp_smarthost: 'smtp.gmail.com:587'
+      smtp_from: 'your-email@gmail.com'
+      smtp_auth_username: 'your-email@gmail.com'
+      smtp_auth_password: 'your-app-password'
+    
+    route:
+      group_by: ['alertname']
+      receiver: 'email-and-teams'
+      routes:
+        - match:
+            severity: critical
+          receiver: 'email-and-teams'
+
+    receivers:
+    - name: 'email-and-teams'
+      email_configs:
+      - to: 'admin@example.com'
+      
+      # Microsoft Teams Webhook (requires msteams-alertmanager-bridge or native support check)
+      # Native support allows webhook_configs
+      webhook_configs:
+      - url: 'https://outlook.office.com/webhook/YOUR_TEAMS_WEBHOOK_URL'
+
+prometheus:
+  prometheusSpec:
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: 
+      matchLabels:
+        release: prometheus # Make sure this matches helm release name

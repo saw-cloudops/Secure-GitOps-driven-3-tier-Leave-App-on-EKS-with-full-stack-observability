@@ -1,0 +1,23 @@
+loki:
+  auth_enabled: false
+  storage:
+    type: s3
+    s3:
+      region: us-east-1
+      s3: s3://YOUR_ACCESS_KEY:YOUR_SECRET_KEY@us-east-1/your-loki-bucket
+      # RECOMMENDED: Use IRSA (IAM Roles for Service Accounts) instead of hardcoding keys
+      # s3: s3://us-east-1/your-loki-bucket
+  
+  schema_config:
+    configs:
+      - from: 2020-10-24
+        store: boltdb-shipper
+        object_store: s3
+        schema: v11
+        index:
+          prefix: index_
+          period: 24h
+
+promtail:
+  # Promtail automatically scrapes K8s pods stdout
+  enabled: true
