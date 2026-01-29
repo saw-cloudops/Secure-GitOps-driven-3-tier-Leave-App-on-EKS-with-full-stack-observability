@@ -15,11 +15,14 @@ app.use((req, res, next) => {
   next();
 });
 
-/* ALB Health Check */
+const router = express.Router();
+
+/* ALB Health Check - Available at root and /api/health */
 app.get("/health", (_, res) => res.send("OK"));
+router.get("/health", (_, res) => res.send("OK"));
 
 /* REGISTER USER */
-app.post("/register", async (req, res) => {
+router.post("/register", async (req, res) => {
   const { username, password, role } = req.body;
   const hash = await bcrypt.hash(password, 10);
 
@@ -37,7 +40,7 @@ app.post("/register", async (req, res) => {
 });
 
 /* LOGIN */
-app.post("/login", (req, res) => {
+router.post("/login", (req, res) => {
   const { username, password } = req.body;
 
   db.query(
@@ -65,7 +68,7 @@ app.post("/login", (req, res) => {
 });
 
 /* EMPLOYEE APPLY LEAVE */
-app.post("/leave", auth(), (req, res) => {
+router.post("/leave", auth(), (req, res) => {
   const { start_date, end_date, reason } = req.body;
 
   db.query(
@@ -82,7 +85,7 @@ app.post("/leave", auth(), (req, res) => {
 });
 
 /* EMPLOYEE VIEW OWN LEAVES */
-app.get("/leave", auth(), (req, res) => {
+router.get("/leave", auth(), (req, res) => {
   db.query(
     "SELECT * FROM leave_requests WHERE user_id=?",
     [req.user.id],
@@ -97,7 +100,7 @@ app.get("/leave", auth(), (req, res) => {
 });
 
 /* ADMIN VIEW ALL LEAVES */
-app.get("/admin/leaves", auth("ADMIN"), (_, res) => {
+router.get("/admin/leaves", auth("ADMIN"), (_, res) => {
   db.query(
     "SELECT lr.*, u.username FROM leave_requests lr JOIN users u ON lr.user_id=u.id",
     (err, rows) => {
@@ -111,7 +114,7 @@ app.get("/admin/leaves", auth("ADMIN"), (_, res) => {
 });
 
 /* ADMIN APPROVE / REJECT */
-app.post("/admin/leave/:id", auth("ADMIN"), (req, res) => {
+router.post("/admin/leave/:id", auth("ADMIN"), (req, res) => {
   const { status } = req.body;
 
   db.query(
@@ -126,5 +129,7 @@ app.post("/admin/leave/:id", auth("ADMIN"), (req, res) => {
     }
   );
 });
+
+app.use("/api", router);
 
 app.listen(3000, () => console.log("Backend running on 3000"));

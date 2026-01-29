@@ -4,4 +4,4 @@ LOCAL:
 AWS:
   http://<BACKEND-ALB-DNS>
 */
-export const API_URL = "http://localhost:3000";
+export const API_URL = window.env?.API_URL || "/api";
