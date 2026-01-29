@@ -1,0 +1,18 @@
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  username VARCHAR(50) UNIQUE,
+  password VARCHAR(255),
+  role ENUM('EMPLOYEE','ADMIN') DEFAULT 'EMPLOYEE'
+);
+
+CREATE TABLE leave_requests (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT,
+  start_date DATE,
+  end_date DATE,
+  reason VARCHAR(255),
+  status ENUM('PENDING','APPROVED','REJECTED') DEFAULT 'PENDING',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
