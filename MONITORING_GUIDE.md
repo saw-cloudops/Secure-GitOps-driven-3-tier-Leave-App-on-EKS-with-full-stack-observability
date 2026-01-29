@@ -129,3 +129,20 @@ http_request_duration_seconds_bucket{le="+Inf"}
 2.  **Traces**: Grafana > Explore > Datasource: `Tempo` > Query Type: `Search` > Service Name: `leave-backend`
 3.  **Metrics**: Grafana > Explore > Datasource: `Prometheus` > `up`
 
+
+## 7. Advanced Hardening (Recommended)
+
+### A. Alert Rules
+We created `monitoring/alert-rules.yaml` which defines **High Error Rate** and **High Latency** alerts.
+```bash
+kubectl apply -f monitoring/alert-rules.yaml
+```
+
+### B. Network Security
+To prevent unauthorized access to your Database from other pods (or hackers inside constraints), apply the Network Policy:
+```bash
+kubectl apply -f k8s/network-policies.yaml
+```
+*Note: This strictly limits MySQL traffic to ONLY come from pods labeled `app: backend`.*
+
+
