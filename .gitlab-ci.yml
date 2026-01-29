@@ -1,0 +1,102 @@
+image: node:18-alpine
+
+stages:
+  - test
+  - security
+  - build
+  - deploy
+
+variables:
+  # CONFIGURE THESE IN GITLAB CI/CD SETTINGS
+  AWS_REGION: "us-east-1"
+  ECR_REGISTRY: "YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com"
+  BACKEND_IMAGE_NAME: "leave-backend"
+  FRONTEND_IMAGE_NAME: "leave-frontend"
+
+# --- UNIT TESTING STAGE ---
+test_backend:
+  stage: test
+  script:
+    - cd backend
+    - npm install
+    - npm test
+
+test_frontend:
+  stage: test
+  script:
+    - cd frontend
+    - npm install
+    - npm test
+
+# --- SECURITY STAGE (DevSecOps) ---
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+
+sast:
+  stage: security
+
+secret_detection:
+  stage: security
+
+dependency_scanning:
+  stage: security
+
+# --- BUILD STAGE ---
+build_and_push:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    - apk add --no-cache aws-cli
+    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+  script:
+    # Backend
+    - echo "Building Backend..."
+    - cd backend
+    - docker build -t $ECR_REGISTRY/$BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA .
+    - docker push $ECR_REGISTRY/$BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+    - cd ..
+    
+    # Frontend
+    - echo "Building Frontend..."
+    - cd frontend
+    - docker build -t $ECR_REGISTRY/$FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA .
+    - docker push $ECR_REGISTRY/$FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+    - cd ..
+  only:
+    - main
+    - master
+
+# --- DEPLOY STAGE ---
+update_manifests:
+  stage: deploy
+  image: bitnami/git:latest
+  before_script:
+    - git config --global user.email "ci-bot@gitlab.com"
+    - git config --global user.name "CI Bot"
+  script:
+    - git checkout $CI_COMMIT_REF_NAME
+    
+    # Update Backend Deployment Image
+    - sed -i "s|image: .*$BACKEND_IMAGE_NAME.*|image: $ECR_REGISTRY/$BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA|g" k8s/backend.yaml
+    
+    # Update Frontend Deployment Image
+    - sed -i "s|image: .*$FRONTEND_IMAGE_NAME.*|image: $ECR_REGISTRY/$FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA|g" k8s/frontend.yaml
+    
+    # Commit and Push
+    - git add k8s/backend.yaml k8s/frontend.yaml
+    - |
+      if git diff --cached --quiet; then
+        echo "No changes to commit."
+      else
+        git commit -m "Update image tags to $CI_COMMIT_SHORT_SHA [skip ci]"
+        # Pushing back to the repository using the job token
+        git remote set-url origin "https://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+        git push origin HEAD:$CI_COMMIT_REF_NAME
+      fi
+  only:
+    - main
+    - master

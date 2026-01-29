@@ -14,11 +14,10 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: leave-frontend:latest
-        imagePullPolicy: IfNotPresent
+        image: REPLACE_WITH_ECR_REGISTRY/leave-frontend:latest # CI WILL UPDATE THIS LINE
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
-        # No API_URL needed anymore because we default to /api which works via Ingress
 ---
 apiVersion: v1
 kind: Service

@@ -132,4 +132,8 @@ router.post("/admin/leave/:id", auth("ADMIN"), (req, res) => {
 
 app.use("/api", router);
 
-app.listen(3000, () => console.log("Backend running on 3000"));
+if (require.main === module) {
+  app.listen(3000, () => console.log("Backend running on 3000"));
+}
+
+module.exports = app;

@@ -14,8 +14,8 @@ spec:
     spec:
       containers:
       - name: backend
-        image: leave-backend:latest
-        imagePullPolicy: IfNotPresent
+        image: REPLACE_WITH_ECR_REGISTRY/leave-backend:latest # CI WILL UPDATE THIS LINE
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
         env:
