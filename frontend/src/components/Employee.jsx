@@ -8,7 +8,7 @@ export default function Employee({ token }) {
   async function load() {
     setLoading(true);
     const res = await fetch(API_URL + "/leave", {
-      headers: { Authorization: token }
+      headers: { Authorization: `Bearer ${token}` }
     });
     setLeaves(await res.json());
     setLoading(false);
@@ -22,7 +22,7 @@ export default function Employee({ token }) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: token
+        Authorization: `Bearer ${token}`
       },
       body: JSON.stringify({
         start_date: e.target.start.value,
@@ -148,10 +148,10 @@ export default function Employee({ token }) {
                   </p>
                   <div className="flex items-center gap-3">
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${l.status === "APPROVED"
-                        ? "bg-green-100 text-green-700"
-                        : l.status === "REJECTED"
-                          ? "bg-red-100 text-red-700"
-                          : "bg-yellow-100 text-yellow-700"
+                      ? "bg-green-100 text-green-700"
+                      : l.status === "REJECTED"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-yellow-100 text-yellow-700"
                       }`}>
                       {l.status || "PENDING"}
                     </span>

@@ -1,10 +1,9 @@
 /* instrumentation.js */
 const { NodeSDK } = require('@opentelemetry/sdk-node');
 const { PrometheusExporter } = require('@opentelemetry/exporter-prometheus');
-const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-proto'); // OTLP exporter for Tempo
+const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http'); // OTLP exporter for Tempo
 const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
-const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+
 
 // Metrics: Prometheus Exporter listening on port 9464
 const metricsExporter = new PrometheusExporter({
@@ -19,9 +18,7 @@ const metricsExporter = new PrometheusExporter({
 const traceExporter = new OTLPTraceExporter();
 
 const sdk = new NodeSDK({
-    resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: 'leave-backend',
-    }),
+    serviceName: 'leave-backend',
     metricReader: metricsExporter,
     traceExporter: traceExporter,
     instrumentations: [getNodeAutoInstrumentations()],

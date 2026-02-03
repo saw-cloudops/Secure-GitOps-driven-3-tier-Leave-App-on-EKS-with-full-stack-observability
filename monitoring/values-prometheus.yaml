@@ -19,8 +19,6 @@ alertmanager:
       email_configs:
       - to: 'admin@example.com'
       
-      # Microsoft Teams Webhook (requires msteams-alertmanager-bridge or native support check)
-      # Native support allows webhook_configs
       webhook_configs:
       - url: 'https://outlook.office.com/webhook/YOUR_TEAMS_WEBHOOK_URL'
 
@@ -29,4 +27,53 @@ prometheus:
     serviceMonitorSelectorNilUsesHelmValues: false
     serviceMonitorSelector: 
       matchLabels:
-        release: prometheus # Make sure this matches helm release name
+        release: prometheus
+    
+    # Enable Persistence for EKS
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+
+# Grafana Configuration for EKS
+grafana:
+  # 1. Persistence: Save dashboards/users to EBS
+  persistence:
+    enabled: true
+    type: pvc
+    storageClassName: gp3
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+
+  # 2. Auto-configure Sources (EKS is a fresh install, so no conflict)
+  additionalDataSources:
+    - name: Loki
+      type: loki
+      uid: loki
+      url: http://loki:3100
+      access: proxy
+      jsonData:
+        maxLines: 1000
+    - name: Tempo
+      type: tempo
+      uid: tempo
+      url: http://tempo.monitoring.svc.cluster.local:3200
+      access: proxy
+
+  # 3. Expose via AWS Load Balancer
+  ingress:
+    enabled: true
+    ingressClassName: alb
+    annotations:
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/target-type: ip
+      # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    hosts:
+      - grafana.example.com
+    paths:
+      - /

@@ -1,0 +1,20 @@
+# Values for Grafana Tempo on EKS
+tempo:
+  structuredConfig:
+    storage:
+      trace:
+        backend: s3
+        s3:
+          bucket: your-tempo-bucket
+          endpoint: s3.us-east-1.amazonaws.com
+          region: us-east-1
+          # Leave access_key/secret_key empty for IRSA
+          
+serviceAccount:
+  create: true
+  name: tempo-sa
+  annotations:
+    # REPLACE THIS with your actual IAM Role ARN
+    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/TempoStorageRole"
+
+# Ensure connection permissions if restricting traffic
