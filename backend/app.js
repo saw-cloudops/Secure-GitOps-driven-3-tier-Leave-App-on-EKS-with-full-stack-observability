@@ -15,11 +15,17 @@ app.use((req, res, next) => {
   next();
 });
 
-/* ALB Health Check */
+/* ROOT HEALTH CHECK (For Target Group Health Checks) */
 app.get("/health", (_, res) => res.send("OK"));
 
+/* API ROUTER (For ALB Routed Requests) */
+const apiRouter = express.Router();
+
+/* API HEALTH CHECK */
+apiRouter.get("/health", (_, res) => res.json({ status: "healthy" }));
+
 /* REGISTER USER */
-app.post("/register", async (req, res) => {
+apiRouter.post("/register", async (req, res) => {
   const { username, password, role } = req.body;
   const hash = await bcrypt.hash(password, 10);
 
@@ -37,7 +43,7 @@ app.post("/register", async (req, res) => {
 });
 
 /* LOGIN */
-app.post("/login", (req, res) => {
+apiRouter.post("/login", (req, res) => {
   const { username, password } = req.body;
 
   db.query(
@@ -65,7 +71,7 @@ app.post("/login", (req, res) => {
 });
 
 /* EMPLOYEE APPLY LEAVE */
-app.post("/leave", auth(), (req, res) => {
+apiRouter.post("/leave", auth(), (req, res) => {
   const { start_date, end_date, reason } = req.body;
 
   db.query(
@@ -82,7 +88,7 @@ app.post("/leave", auth(), (req, res) => {
 });
 
 /* EMPLOYEE VIEW OWN LEAVES */
-app.get("/leave", auth(), (req, res) => {
+apiRouter.get("/leave", auth(), (req, res) => {
   db.query(
     "SELECT * FROM leave_requests WHERE user_id=?",
     [req.user.id],
@@ -97,7 +103,7 @@ app.get("/leave", auth(), (req, res) => {
 });
 
 /* ADMIN VIEW ALL LEAVES */
-app.get("/admin/leaves", auth("ADMIN"), (_, res) => {
+apiRouter.get("/admin/leaves", auth("ADMIN"), (_, res) => {
   db.query(
     "SELECT lr.*, u.username FROM leave_requests lr JOIN users u ON lr.user_id=u.id",
     (err, rows) => {
@@ -111,7 +117,7 @@ app.get("/admin/leaves", auth("ADMIN"), (_, res) => {
 });
 
 /* ADMIN APPROVE / REJECT */
-app.post("/admin/leave/:id", auth("ADMIN"), (req, res) => {
+apiRouter.post("/admin/leave/:id", auth("ADMIN"), (req, res) => {
   const { status } = req.body;
 
   db.query(
@@ -126,5 +132,8 @@ app.post("/admin/leave/:id", auth("ADMIN"), (req, res) => {
     }
   );
 });
+
+// MOUNT THE ROUTER AT /api
+app.use("/api", apiRouter);
 
 app.listen(3000, () => console.log("Backend running on 3000"));
