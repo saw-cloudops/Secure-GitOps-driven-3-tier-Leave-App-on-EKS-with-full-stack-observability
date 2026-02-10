@@ -2,14 +2,18 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: backend-monitor
+  namespace: monitoring
   labels:
-    release: prometheus # Must match the Prometheus Helm Release name (usually 'prometheus' or 'kube-prometheus-stack')
+    release: prometheus
 spec:
   selector:
     matchLabels:
       app: backend
+  namespaceSelector:
+    matchNames:
+      - leave-system
   endpoints:
-  - port: metrics-otel # We will add this named port to the deployment
+  - port: metrics-otel
     path: /metrics
     interval: 15s
 ---

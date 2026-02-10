@@ -76,6 +76,8 @@ kind: Service
 metadata:
   name: backend
   namespace: leave-system
+  labels:
+    app: backend
 spec:
   selector:
     app: backend
