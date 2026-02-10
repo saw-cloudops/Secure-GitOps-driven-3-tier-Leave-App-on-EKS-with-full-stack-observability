@@ -745,13 +745,13 @@ Description: Backend API base URL
    DB_NAME=$(aws ssm get-parameter --name "/leave-app/production/DB_NAME" --with-decryption --query "Parameter.Value" --output text)
    JWT_SECRET=$(aws ssm get-parameter --name "/leave-app/production/JWT_SECRET" --with-decryption --query "Parameter.Value" --output text)
 
-   # Create .env file
+   # Create .env file with quoted values to handle special characters
    cat > .env << EOF
-   DB_HOST=$DB_HOST
-   DB_USER=$DB_USER
-   DB_PASS=$DB_PASS
-   DB_NAME=$DB_NAME
-   JWT_SECRET=$JWT_SECRET
+   DB_HOST='$DB_HOST'
+   DB_USER='$DB_USER'
+   DB_PASS='$DB_PASS'
+   DB_NAME='$DB_NAME'
+   JWT_SECRET='$JWT_SECRET'
    PORT=3000
    EOF
 
