@@ -911,8 +911,8 @@ app.use("/api", apiRouter);
    cd /home/ec2-user
 
    # Clone repository and checkout deploy/aws branch
-   git clone -b deploy/aws https://github.com/hlaingminpaing/3-tier-leave-management-system.git 
-   cd 3-tier-leave-management-system/frontend
+   git clone -b deploy/aws https://github.com/hlaingminpaing/3-tier-leave-management-system.git app
+   cd app/frontend
 
    # Install dependencies
    npm install
