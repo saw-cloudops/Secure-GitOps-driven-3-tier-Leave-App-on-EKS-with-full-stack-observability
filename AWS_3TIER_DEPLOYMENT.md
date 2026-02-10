@@ -723,14 +723,15 @@ Description: Backend API base URL
    dnf update -y
 
    # Install Node.js 22 (LTS)
-   dnf install -y nodejs git
+   curl -fsSL https://rpm.nodesource.com/setup_22.x | bash -
+   dnf install -y nodejs git nginx
 
    # Create application directory
    cd /home/ec2-user
 
    # Clone repository and checkout deploy/aws branch
-   git clone -b deploy/aws https://github.com/hlaingminpaing/3-tier-leave-management-system.git 
-   cd 3-tier-leave-management-system/backend
+   git clone -b deploy/aws https://github.com/hlaingminpaing/3-tier-leave-management-system.git app
+   cd app/backend
 
    # Install dependencies
    npm install
@@ -824,30 +825,6 @@ USE leave_db;
 -- Then run the CREATE TABLE statements from db.sql
 ```
 
-### 9.3 Configure API Routes for ALB
-
-**Important:** The Application Load Balancer forwards requests with the `/api` prefix (e.g., `/api/login`) to your backend. Your Express app must be configured to handle this prefix.
-
-Update your `backend/app.js` to mount routes on `/api`:
-
-```javascript
-/* ROOT HEALTH CHECK (For Target Group) */
-app.get("/health", (_, res) => res.send("OK"));
-
-/* API ROUTER (For ALB Requests) */
-const apiRouter = express.Router();
-
-// Define all your routes on the router instead of app
-apiRouter.get("/health", (_, res) => res.json({ status: "healthy" }));
-apiRouter.post("/register", ...);
-apiRouter.post("/login", ...);
-// ... other routes ...
-
-// Mount router at /api
-app.use("/api", apiRouter);
-```
-```
-
 ---
 
 ## 10. Frontend Tier Deployment
@@ -904,7 +881,8 @@ app.use("/api", apiRouter);
    # Update system
    dnf update -y
 
-   # Install Node.js 22 and Nginx
+   # Install Node.js 22 (Vite requires Node 20+)
+   curl -fsSL https://rpm.nodesource.com/setup_22.x | bash -
    dnf install -y nodejs git nginx
 
    # Create application directory
