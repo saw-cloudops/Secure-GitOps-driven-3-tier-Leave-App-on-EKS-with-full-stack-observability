@@ -1202,18 +1202,145 @@ Action: Send SNS notification
 - [ ] Set up CloudFront CDN for better performance
 - [ ] Implement CI/CD pipeline with AWS CodePipeline
 
----
 
-## 📚 Additional Resources
+# 🏗️ EKS 3-Tier Architecture Deployment Guide
 
-- [AWS VPC Documentation](https://docs.aws.amazon.com/vpc/)
-- [Application Load Balancer Guide](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/)
-- [Auto Scaling Documentation](https://docs.aws.amazon.com/autoscaling/)
-- [RDS MySQL Guide](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/)
-- [AWS Well-Architected Framework](https://aws.amazon.com/architecture/well-architected/)
+This section details how to migrate and deploy the 3-Tier Leave Management System to **Amazon EKS (Elastic Kubernetes Service)**.
 
----
+### Architecture on EKS
 
-**Document Version:** 2.0  
-**Last Updated:** February 10, 2026  
-**Maintained By:** DevOps Team
+```
+Internet
+    ↓
+AWS Application Load Balancer (ALB)
+    ↓
+┌─────────────────────────────────────────────────┐
+| EKS Cluster                                     |
+|                                                 |
+|   [Ingress: leave-ingress]                      |
+|          ↓               ↓                      |
+|    [Svc: frontend]   [Svc: backend]             |
+|          ↓               ↓                      |
+|    [Pod: frontend]   [Pod: backend]             |
+|          |               ↓                      |
+└──────────┼───────────────┼──────────────────────┘
+           |               |
+           ↓               ↓
+    [Pod: mysql]   OR   [AWS RDS MySQL]
+```
+
+###  Prerequisites
+
+1.  **AWS CLI** installed and configured.
+2.  **kubectl** installed.
+3.  **eksctl** installed (for creating clusters).
+4.  **Docker** installed (to build images).
+5.  **Helm** installed (for AWS Load Balancer Controller).
+
+### Create EKS Cluster
+
+Create a cluster with OIDC enabled (required for IAM roles for service accounts):
+
+```bash
+eksctl create cluster \
+  --name leave-system-cluster \
+  --region us-east-1 \
+  --version 1.27 \
+  --nodegroup-name standard-workers \
+  --node-type t3.medium \
+  --nodes 2 \
+  --with-oidc
+```
+
+### Deployment Steps
+
+#### Step 1: Build and Push Docker Images
+
+You need to push your application images to Docker Hub or Amazon ECR.
+
+```bash
+# Backend
+cd backend
+docker build -t your-dockerhub-user/leave-backend:v1 .
+docker push your-dockerhub-user/leave-backend:v1
+
+# Frontend
+cd frontend
+docker build -t your-dockerhub-user/leave-frontend:v1 .
+docker push your-dockerhub-user/leave-frontend:v1
+```
+
+*Update `k8s/backend.yaml` and `k8s/frontend.yaml` with your new image names.*
+
+#### Step 2: Set Up Database
+
+**Option A: MySQL in EKS (Testing/Dev)**
+1.  Apply the MySQL deployment:
+    ```
+    kubectl apply -f k8s/secrets.yaml
+    kubectl apply -f k8s/mysql.yaml
+    ```
+2.  Wait for the pod to start:
+    ```bash
+    kubectl wait --for=condition=ready pod -l app=mysql --timeout=120s
+    ```
+3.  Initialize the database schema:
+    ```bash
+    # Get Pod Name
+    POD=\$(kubectl get pods -l app=mysql -o jsonpath=\"{.items[0].metadata.name}\")
+    
+    # Run SQL
+    kubectl exec -i \$POD -- mysql -u root -proot leave_db < db.sql
+    ```
+
+**Option B: AWS RDS (Production)**
+1.  Create an RDS instance (MySQL).
+2.  Update `k8s/secrets.yaml` with your RDS endpoint, username, and password.
+3.  Ensure the RDS Security Group allows traffic from your EKS Node Group Security Group.
+
+#### Step 3: Deploy Application
+
+1.  **Apply Secrets:**
+    ```bash
+    kubectl apply -f k8s/secrets.yaml
+    ```
+
+2.  **Deploy Backend & Frontend:**
+    ```bash
+    kubectl apply -f k8s/backend.yaml
+    kubectl apply -f k8s/frontend.yaml
+    ```
+
+#### Step 4: Configure Networking (Ingress)
+
+To expose your application using an AWS Application Load Balancer, you need the **AWS Load Balancer Controller**.
+
+1.  **Install Load Balancer Controller** (if not already installed). Follow the [official AWS guide](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html).
+
+2.  **Edit Ingress Manifest:**
+    *   Open `k8s/ingress.yaml`
+    *   Update `alb.ingress.kubernetes.io/certificate-arn` with your ACM Certificate ARN (required for HTTPS).
+
+3.  **Apply Ingress:**
+    ```bash
+    kubectl apply -f k8s/ingress.yaml
+    ```
+
+4.  **Get Load Balancer URL:**
+    ```bash
+    kubectl get ingress leave-ingress
+    ```
+    *Copy the `ADDRESS` field (e.g., `k8s-default-leaveing-....us-east-1.elb.amazonaws.com`).*
+
+### 14.4 Validation
+
+*   **Frontend**: Visit the Load Balancer URL in your browser.
+*   **Backend API**: Visit `http://<LOAD_BALANCER_URL>/api/health` ⇒ Should return `{\"status\": \"healthy\"}`.
+*   **Database**: Log in to the frontend, register a user, and check if data persists.
+
+### 14.5 Troubleshooting Common Errors
+
+*   **502 Bad Gateway**: Check backend logs (`kubectl logs -l app=backend`). It usually means the backend cannot connect to the database.
+*   **404 Not Found (Frontend)**: Ensure your `k8s/ingress.yaml` has the correct path routing rules.
+*   **CrashLoopBackOff**: Check pod logs. Often incorrect database credentials or missing environment variables.
+*   **Ingress Address Empty**: Ensure the AWS Load Balancer Controller is running properly (`kubectl get deployment -n kube-system aws-load-balancer-controller`)."
