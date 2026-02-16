@@ -730,7 +730,7 @@ Description: Backend API base URL
    cd /home/ec2-user
 
    # Clone repository and checkout deploy/aws branch
-   git clone -b deploy/aws https://github.com/hlaingminpaing/3-tier-leave-management-system.git app
+   git clone https://github.com/hlaingminpaing/3-tier-leave-management-system.git app
    cd app/backend
 
    # Install dependencies
@@ -889,7 +889,7 @@ USE leave_db;
    cd /home/ec2-user
 
    # Clone repository and checkout deploy/aws branch
-   git clone -b deploy/aws https://github.com/hlaingminpaing/3-tier-leave-management-system.git app
+   git clone https://github.com/hlaingminpaing/3-tier-leave-management-system.git app
    cd app/frontend
 
    # Install dependencies
