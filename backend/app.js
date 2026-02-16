@@ -16,14 +16,18 @@ app.use((req, res, next) => {
   next();
 });
 
-const router = express.Router();
-
-/* ALB Health Check - Available at root and /api/health */
+/* ROOT HEALTH CHECK (For Target Group Health Checks) */
+// This was from deploy/aws
 app.get("/health", (_, res) => res.send("OK"));
-router.get("/health", (_, res) => res.send("OK"));
+
+/* API ROUTER (For ALB Routed Requests) */
+const apiRouter = express.Router();
+
+/* API HEALTH CHECK */
+apiRouter.get("/health", (_, res) => res.json({ status: "healthy" }));
 
 /* REGISTER USER */
-router.post("/register", async (req, res) => {
+apiRouter.post("/register", async (req, res) => {
   const { username, password, role } = req.body;
   const hash = await bcrypt.hash(password, 10);
 
@@ -41,7 +45,7 @@ router.post("/register", async (req, res) => {
 });
 
 /* LOGIN */
-router.post("/login", (req, res) => {
+apiRouter.post("/login", (req, res) => {
   const { username, password } = req.body;
 
   db.query(
@@ -69,7 +73,7 @@ router.post("/login", (req, res) => {
 });
 
 /* EMPLOYEE APPLY LEAVE */
-router.post("/leave", auth(), (req, res) => {
+apiRouter.post("/leave", auth(), (req, res) => {
   const { start_date, end_date, reason } = req.body;
 
   db.query(
@@ -86,7 +90,7 @@ router.post("/leave", auth(), (req, res) => {
 });
 
 /* EMPLOYEE VIEW OWN LEAVES */
-router.get("/leave", auth(), (req, res) => {
+apiRouter.get("/leave", auth(), (req, res) => {
   db.query(
     "SELECT * FROM leave_requests WHERE user_id=?",
     [req.user.id],
@@ -101,7 +105,7 @@ router.get("/leave", auth(), (req, res) => {
 });
 
 /* ADMIN VIEW ALL LEAVES */
-router.get("/admin/leaves", auth("ADMIN"), (_, res) => {
+apiRouter.get("/admin/leaves", auth("ADMIN"), (_, res) => {
   db.query(
     "SELECT lr.*, u.username FROM leave_requests lr JOIN users u ON lr.user_id=u.id",
     (err, rows) => {
@@ -115,7 +119,7 @@ router.get("/admin/leaves", auth("ADMIN"), (_, res) => {
 });
 
 /* ADMIN APPROVE / REJECT */
-router.post("/admin/leave/:id", auth("ADMIN"), (req, res) => {
+apiRouter.post("/admin/leave/:id", auth("ADMIN"), (req, res) => {
   const { status } = req.body;
 
   db.query(
@@ -131,7 +135,8 @@ router.post("/admin/leave/:id", auth("ADMIN"), (req, res) => {
   );
 });
 
-app.use("/api", router);
+// MOUNT THE ROUTER AT /api
+app.use("/api", apiRouter);
 
 if (require.main === module) {
   app.listen(3000, () => console.log("Backend running on 3000"));
