@@ -1332,13 +1332,13 @@ To expose your application using an AWS Application Load Balancer, you need the 
     ```
     *Copy the `ADDRESS` field (e.g., `k8s-default-leaveing-....us-east-1.elb.amazonaws.com`).*
 
-### 14.4 Validation
+### Validation
 
 *   **Frontend**: Visit the Load Balancer URL in your browser.
 *   **Backend API**: Visit `http://<LOAD_BALANCER_URL>/api/health` ⇒ Should return `{\"status\": \"healthy\"}`.
 *   **Database**: Log in to the frontend, register a user, and check if data persists.
 
-### 14.5 Troubleshooting Common Errors
+### Troubleshooting Common Errors
 
 *   **502 Bad Gateway**: Check backend logs (`kubectl logs -l app=backend`). It usually means the backend cannot connect to the database.
 *   **404 Not Found (Frontend)**: Ensure your `k8s/ingress.yaml` has the correct path routing rules.
