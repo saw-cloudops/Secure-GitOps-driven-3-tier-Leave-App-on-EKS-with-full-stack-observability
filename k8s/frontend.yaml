@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: REPLACE_WITH_ECR_REGISTRY/leave-frontend:latest # CI WILL UPDATE THIS LINE
+        image: hlaingminpaing/leave-management-system:frontend-v1 # CI WILL UPDATE THIS LINE
         imagePullPolicy: Always
         ports:
         - containerPort: 80

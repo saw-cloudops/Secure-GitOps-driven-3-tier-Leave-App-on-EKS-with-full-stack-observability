@@ -29,7 +29,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy entrypoint script
 COPY entrypoint.sh /docker-entrypoint.d/99-config.sh
-RUN chmod +x /docker-entrypoint.d/99-config.sh
+# Fix Windows line endings and make executable
+RUN sed -i 's/\r$//' /docker-entrypoint.d/99-config.sh && \
+    chmod +x /docker-entrypoint.d/99-config.sh
 
 # Add healthcheck
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
