@@ -4,21 +4,22 @@
   "type": "module",
   "private": true,
   "dependencies": {
+    "prop-types": "^15.8.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/user-event": "^14.5.2",
     "@vitejs/plugin-react": "^5.1.2",
+    "@vitest/coverage-v8": "^3.0.0",
     "autoprefixer": "^10.4.20",
+    "jsdom": "^26.0.0",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.17",
     "vite": "^6.3.5",
-    "vitest": "^3.0.0",
-    "@vitest/coverage-v8": "^3.0.0",
-    "jsdom": "^26.0.0",
-    "@testing-library/react": "^16.1.0",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/user-event": "^14.5.2"
+    "vitest": "^3.0.0"
   },
   "scripts": {
     "dev": "vite",
