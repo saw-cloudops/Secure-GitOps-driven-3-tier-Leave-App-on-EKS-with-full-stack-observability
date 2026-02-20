@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: hlaingminpaing/leave-management-system:backend-v1 # CI WILL UPDATE THIS LINE
+        image: ghcr.io/hlaingminpaing/3-tier-leave-management-system/backend:sha-ff055f5
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
