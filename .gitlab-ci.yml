@@ -92,8 +92,10 @@ update_manifests:
         echo "No changes to commit."
       else
         git commit -m "Update image tags to $CI_COMMIT_SHORT_SHA [skip ci]"
-        # Pushing back to the repository using the job token
-        git remote set-url origin "https://oauth2:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
+        # Pushing back to the repository using a Project Access Token
+        # NOTE: You MUST create a Project/Personal Access Token with 'write_repository' scope
+        # and save it as a CI/CD Variable named GIT_PUSH_TOKEN in Settings > CI/CD > Variables
+        git remote set-url origin "https://oauth2:${GIT_PUSH_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_PATH}.git"
         git push origin HEAD:$CI_COMMIT_REF_NAME
       fi
   only:
