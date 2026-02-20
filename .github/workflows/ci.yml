@@ -72,6 +72,9 @@ jobs:
     name: SonarCloud Scan
     needs: [test-backend, test-frontend]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write # Allows SonarCloud to comment on PRs
     steps:
       - uses: actions/checkout@v4
         with:
