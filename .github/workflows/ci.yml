@@ -114,7 +114,7 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write # Needed to commit changes back to the repo
       packages: write
       
     steps:
@@ -163,3 +163,21 @@ jobs:
           push: true
           tags: ${{ steps.meta-frontend.outputs.tags }}
           labels: ${{ steps.meta-frontend.outputs.labels }}
+
+      - name: Update Kubernetes Manifests
+        run: |
+          # Extract the 7-character short SHA to match the Docker output
+          SHORT_SHA=${GITHUB_SHA::7}
+          
+          # Replace the image lines in the k8s deployment files
+          sed -i "s|image: .*|image: ${{ env.REGISTRY }}/${{ github.repository }}/backend:sha-$SHORT_SHA|g" k8s/backend.yaml
+          sed -i "s|image: .*|image: ${{ env.REGISTRY }}/${{ github.repository }}/frontend:sha-$SHORT_SHA|g" k8s/frontend.yaml
+
+      - name: Commit and Push K8s Manifests
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add k8s/backend.yaml k8s/frontend.yaml
+          
+          # Only commit and push if there are changes
+          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update k8s manifests with new image tags [skip ci]" && git push)
