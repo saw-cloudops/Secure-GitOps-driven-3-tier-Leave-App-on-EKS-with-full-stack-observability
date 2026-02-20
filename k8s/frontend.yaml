@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ghcr.io/hlaingminpaing/3-tier-leave-management-system/frontend:sha-e58e481
+        image: ghcr.io/hlaingminpaing/3-tier-leave-management-system/frontend:sha-027f465
         imagePullPolicy: Always
         ports:
         - containerPort: 80
