@@ -1,5 +1,6 @@
 import { API_URL } from "../api";
 import { useState } from "react";
+import PropTypes from "prop-types";
 
 export default function Register({ onSuccess, registerType }) {
   const [loading, setLoading] = useState(false);
@@ -53,10 +54,11 @@ export default function Register({ onSuccess, registerType }) {
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="user" className="block text-sm font-medium text-gray-700 mb-2">
           Username
         </label>
         <input
+          id="user"
           name="user"
           placeholder="Choose a username"
           required
@@ -66,10 +68,11 @@ export default function Register({ onSuccess, registerType }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="pass" className="block text-sm font-medium text-gray-700 mb-2">
           Password
         </label>
         <input
+          id="pass"
           name="pass"
           type="password"
           placeholder="Create a password"
@@ -88,3 +91,8 @@ export default function Register({ onSuccess, registerType }) {
     </form>
   );
 }
+
+Register.propTypes = {
+  onSuccess: PropTypes.func.isRequired,
+  registerType: PropTypes.string.isRequired
+};

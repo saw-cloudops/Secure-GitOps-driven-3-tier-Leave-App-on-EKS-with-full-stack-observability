@@ -1,5 +1,12 @@
 import { API_URL } from "../api";
 import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+
+const statusColors = {
+  APPROVED: "bg-green-100 text-green-700",
+  REJECTED: "bg-red-100 text-red-700",
+  PENDING: "bg-yellow-100 text-yellow-700"
+};
 
 export default function Employee({ token }) {
   const [leaves, setLeaves] = useState([]);
@@ -56,10 +63,11 @@ export default function Employee({ token }) {
         <form onSubmit={apply} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="start" className="block text-sm font-medium text-gray-700 mb-2">
                 Start Date
               </label>
               <input
+                id="start"
                 type="date"
                 name="start"
                 required
@@ -67,10 +75,11 @@ export default function Employee({ token }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="end" className="block text-sm font-medium text-gray-700 mb-2">
                 End Date
               </label>
               <input
+                id="end"
                 type="date"
                 name="end"
                 required
@@ -80,10 +89,11 @@ export default function Employee({ token }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-2">
               Reason
             </label>
             <input
+              id="reason"
               name="reason"
               placeholder="e.g., Family vacation, Medical appointment..."
               required
@@ -147,12 +157,7 @@ export default function Employee({ token }) {
                     {l.reason || "No reason provided"}
                   </p>
                   <div className="flex items-center gap-3">
-                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${l.status === "APPROVED"
-                      ? "bg-green-100 text-green-700"
-                      : l.status === "REJECTED"
-                        ? "bg-red-100 text-red-700"
-                        : "bg-yellow-100 text-yellow-700"
-                      }`}>
+                    <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusColors[l.status || "PENDING"] || statusColors.PENDING}`}>
                       {l.status || "PENDING"}
                     </span>
                     <span className="text-xs text-gray-400">
@@ -168,3 +173,7 @@ export default function Employee({ token }) {
     </div>
   );
 }
+
+Employee.propTypes = {
+  token: PropTypes.string.isRequired
+};

@@ -1,5 +1,12 @@
 import { API_URL } from "../api";
 import { useEffect, useState } from "react";
+import PropTypes from "prop-types";
+
+const statusColors = {
+  APPROVED: "bg-green-100 text-green-700",
+  REJECTED: "bg-red-100 text-red-700",
+  PENDING: "bg-yellow-100 text-yellow-700"
+};
 
 export default function Admin({ token }) {
   const [leaves, setLeaves] = useState([]);
@@ -50,7 +57,7 @@ export default function Admin({ token }) {
 
   const filteredLeaves = leaves.filter(l => {
     if (filter === "all") return true;
-    if (filter === "pending") return !l.status || l.status === "PENDING";
+    if (filter === "pending") return l.status == null || l.status === "PENDING";
     return l.status === filter.toUpperCase();
   });
 
@@ -191,12 +198,7 @@ export default function Admin({ token }) {
 
                     <div className="flex items-center gap-3">
                       <span
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${l.status === "APPROVED"
-                          ? "bg-green-100 text-green-700"
-                          : l.status === "REJECTED"
-                            ? "bg-red-100 text-red-700"
-                            : "bg-yellow-100 text-yellow-700"
-                          }`}
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusColors[l.status || "PENDING"] || statusColors.PENDING}`}
                       >
                         {l.status || "PENDING"}
                       </span>
@@ -231,3 +233,7 @@ export default function Admin({ token }) {
     </div>
   );
 }
+
+Admin.propTypes = {
+  token: PropTypes.string.isRequired
+};

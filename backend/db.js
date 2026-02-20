@@ -1,5 +1,5 @@
 const mysql = require("mysql2");
-const db = require("./db");
+
 /*
 LOCAL:
  export DB_HOST=localhost

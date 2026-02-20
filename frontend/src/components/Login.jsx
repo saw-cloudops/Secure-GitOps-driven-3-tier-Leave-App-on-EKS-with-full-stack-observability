@@ -1,5 +1,6 @@
 import { API_URL } from "../api";
 import { useState } from "react";
+import PropTypes from "prop-types";
 
 export default function Login({ setToken, setRole, loginType }) {
   const [loading, setLoading] = useState(false);
@@ -45,10 +46,11 @@ export default function Login({ setToken, setRole, loginType }) {
       )}
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="user" className="block text-sm font-medium text-gray-700 mb-2">
           Username
         </label>
         <input
+          id="user"
           name="user"
           placeholder="Enter your username"
           required
@@ -58,10 +60,11 @@ export default function Login({ setToken, setRole, loginType }) {
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="pass" className="block text-sm font-medium text-gray-700 mb-2">
           Password
         </label>
         <input
+          id="pass"
           name="pass"
           type="password"
           placeholder="Enter your password"
@@ -80,3 +83,9 @@ export default function Login({ setToken, setRole, loginType }) {
     </form>
   );
 }
+
+Login.propTypes = {
+  setToken: PropTypes.func.isRequired,
+  setRole: PropTypes.func.isRequired,
+  loginType: PropTypes.string.isRequired
+};
