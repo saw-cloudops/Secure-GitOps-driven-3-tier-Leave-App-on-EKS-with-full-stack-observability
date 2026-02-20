@@ -25,7 +25,7 @@ describe("Backend API Endpoints", () => {
         it("should return 200 OK via router", async () => {
             const res = await request(app).get("/api/health");
             expect(res.statusCode).toBe(200);
-            expect(res.text).toBe("OK");
+            expect(res.body).toEqual({ status: "healthy" });
         });
     });
 
