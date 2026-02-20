@@ -1,4 +1,4 @@
-image: node:18-alpine
+image: node:22-alpine
 
 stages:
   - test
@@ -7,26 +7,23 @@ stages:
   - deploy
 
 variables:
-  # CONFIGURE THESE IN GITLAB CI/CD SETTINGS
-  AWS_REGION: "us-east-1"
-  ECR_REGISTRY: "YOUR_AWS_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com"
-  BACKEND_IMAGE_NAME: "leave-backend"
-  FRONTEND_IMAGE_NAME: "leave-frontend"
+  REGISTRY: $CI_REGISTRY
+  IMAGE_PREFIX: $CI_REGISTRY_IMAGE
 
 # --- UNIT TESTING STAGE ---
 test_backend:
   stage: test
   script:
     - cd backend
-    - npm install
-    - npm test
+    - npm ci
+    - npm test -- --coverage
 
 test_frontend:
   stage: test
   script:
     - cd frontend
-    - npm install
-    - npm test
+    - npm ci
+    - npm test -- --coverage
 
 # --- SECURITY STAGE (DevSecOps) ---
 include:
@@ -50,21 +47,23 @@ build_and_push:
   services:
     - docker:dind
   before_script:
-    - apk add --no-cache aws-cli
-    - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY
+    # Authenticate to GitLab Container Registry
+    - echo "$CI_REGISTRY_PASSWORD" | docker login $CI_REGISTRY -u "$CI_REGISTRY_USER" --password-stdin
   script:
     # Backend
     - echo "Building Backend..."
     - cd backend
-    - docker build -t $ECR_REGISTRY/$BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA .
-    - docker push $ECR_REGISTRY/$BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+    - docker build -t $REGISTRY/$IMAGE_PREFIX/backend:sha-$CI_COMMIT_SHORT_SHA -t $REGISTRY/$IMAGE_PREFIX/backend:latest .
+    - docker push $REGISTRY/$IMAGE_PREFIX/backend:sha-$CI_COMMIT_SHORT_SHA
+    - docker push $REGISTRY/$IMAGE_PREFIX/backend:latest
     - cd ..
     
     # Frontend
     - echo "Building Frontend..."
     - cd frontend
-    - docker build -t $ECR_REGISTRY/$FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA .
-    - docker push $ECR_REGISTRY/$FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA
+    - docker build -t $REGISTRY/$IMAGE_PREFIX/frontend:sha-$CI_COMMIT_SHORT_SHA -t $REGISTRY/$IMAGE_PREFIX/frontend:latest .
+    - docker push $REGISTRY/$IMAGE_PREFIX/frontend:sha-$CI_COMMIT_SHORT_SHA
+    - docker push $REGISTRY/$IMAGE_PREFIX/frontend:latest
     - cd ..
   only:
     - main
@@ -81,10 +80,10 @@ update_manifests:
     - git checkout $CI_COMMIT_REF_NAME
     
     # Update Backend Deployment Image
-    - sed -i "s|image: .*$BACKEND_IMAGE_NAME.*|image: $ECR_REGISTRY/$BACKEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA|g" k8s/backend.yaml
+    - sed -i "s|image: .*|image: $REGISTRY/$IMAGE_PREFIX/backend:sha-$CI_COMMIT_SHORT_SHA|g" k8s/backend.yaml
     
     # Update Frontend Deployment Image
-    - sed -i "s|image: .*$FRONTEND_IMAGE_NAME.*|image: $ECR_REGISTRY/$FRONTEND_IMAGE_NAME:$CI_COMMIT_SHORT_SHA|g" k8s/frontend.yaml
+    - sed -i "s|image: .*|image: $REGISTRY/$IMAGE_PREFIX/frontend:sha-$CI_COMMIT_SHORT_SHA|g" k8s/frontend.yaml
     
     # Commit and Push
     - git add k8s/backend.yaml k8s/frontend.yaml
