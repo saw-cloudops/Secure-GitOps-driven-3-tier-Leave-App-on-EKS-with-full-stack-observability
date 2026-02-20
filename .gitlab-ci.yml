@@ -53,17 +53,17 @@ build_and_push:
     # Backend
     - echo "Building Backend..."
     - cd backend
-    - docker build -t $REGISTRY/$IMAGE_PREFIX/backend:sha-$CI_COMMIT_SHORT_SHA -t $REGISTRY/$IMAGE_PREFIX/backend:latest .
-    - docker push $REGISTRY/$IMAGE_PREFIX/backend:sha-$CI_COMMIT_SHORT_SHA
-    - docker push $REGISTRY/$IMAGE_PREFIX/backend:latest
+    - docker build -t $IMAGE_PREFIX/backend:sha-$CI_COMMIT_SHORT_SHA -t $IMAGE_PREFIX/backend:latest .
+    - docker push $IMAGE_PREFIX/backend:sha-$CI_COMMIT_SHORT_SHA
+    - docker push $IMAGE_PREFIX/backend:latest
     - cd ..
     
     # Frontend
     - echo "Building Frontend..."
     - cd frontend
-    - docker build -t $REGISTRY/$IMAGE_PREFIX/frontend:sha-$CI_COMMIT_SHORT_SHA -t $REGISTRY/$IMAGE_PREFIX/frontend:latest .
-    - docker push $REGISTRY/$IMAGE_PREFIX/frontend:sha-$CI_COMMIT_SHORT_SHA
-    - docker push $REGISTRY/$IMAGE_PREFIX/frontend:latest
+    - docker build -t $IMAGE_PREFIX/frontend:sha-$CI_COMMIT_SHORT_SHA -t $IMAGE_PREFIX/frontend:latest .
+    - docker push $IMAGE_PREFIX/frontend:sha-$CI_COMMIT_SHORT_SHA
+    - docker push $IMAGE_PREFIX/frontend:latest
     - cd ..
   only:
     - main
@@ -80,10 +80,10 @@ update_manifests:
     - git checkout $CI_COMMIT_REF_NAME
     
     # Update Backend Deployment Image
-    - 'sed -i "s|image: .*|image: $REGISTRY/$IMAGE_PREFIX/backend:sha-$CI_COMMIT_SHORT_SHA|g" k8s/backend.yaml'
+    - 'sed -i "s|image: .*|image: $IMAGE_PREFIX/backend:sha-$CI_COMMIT_SHORT_SHA|g" k8s/backend.yaml'
     
     # Update Frontend Deployment Image
-    - 'sed -i "s|image: .*|image: $REGISTRY/$IMAGE_PREFIX/frontend:sha-$CI_COMMIT_SHORT_SHA|g" k8s/frontend.yaml'
+    - 'sed -i "s|image: .*|image: $IMAGE_PREFIX/frontend:sha-$CI_COMMIT_SHORT_SHA|g" k8s/frontend.yaml'
     
     # Commit and Push
     - git add k8s/backend.yaml k8s/frontend.yaml
