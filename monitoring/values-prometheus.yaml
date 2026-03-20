@@ -1,79 +1,131 @@
-alertmanager:
-  config:
-    global:
-      smtp_smarthost: 'smtp.gmail.com:587'
-      smtp_from: 'your-email@gmail.com'
-      smtp_auth_username: 'your-email@gmail.com'
-      smtp_auth_password: 'your-app-password'
+# alertmanager:
+#   config:
+#     global:
+#       smtp_smarthost: 'smtp.gmail.com:587'
+#       smtp_from: 'your-email@gmail.com'
+#       smtp_auth_username: 'your-email@gmail.com'
+#       smtp_auth_password: 'your-app-password'
     
-    route:
-      group_by: ['alertname']
-      receiver: 'email-and-teams'
-      routes:
-        - match:
-            severity: critical
-          receiver: 'email-and-teams'
+#     route:
+#       group_by: ['alertname']
+#       receiver: 'email-and-teams'
+#       routes:
+#         - match:
+#             severity: critical
+#           receiver: 'email-and-teams'
 
-    receivers:
-    - name: 'email-and-teams'
-      email_configs:
-      - to: 'admin@example.com'
+#     receivers:
+#     - name: 'email-and-teams'
+#       email_configs:
+#       - to: 'admin@example.com'
       
-      webhook_configs:
-      - url: 'https://outlook.office.com/webhook/YOUR_TEAMS_WEBHOOK_URL'
+#       webhook_configs:
+#       - url: 'https://outlook.office.com/webhook/YOUR_TEAMS_WEBHOOK_URL'
+
+# prometheus:
+#   prometheusSpec:
+#     serviceMonitorSelectorNilUsesHelmValues: false
+#     serviceMonitorSelector: 
+#       matchLabels:
+#         release: prometheus
+    
+#     # Enable Persistence for EKS
+#     storageSpec:
+#       volumeClaimTemplate:
+#         spec:
+#           storageClassName: gp3
+#           accessModes: ["ReadWriteOnce"]
+#           resources:
+#             requests:
+#               storage: 50Gi
+
+# # Grafana Configuration for EKS
+# grafana:
+#   # 1. Persistence: Save dashboards/users to EBS
+#   persistence:
+#     enabled: true
+#     type: pvc
+#     storageClassName: gp3
+#     accessModes:
+#       - ReadWriteOnce
+#     size: 10Gi
+
+#   # 2. Auto-configure Sources (EKS is a fresh install, so no conflict)
+#   additionalDataSources:
+#     - name: Loki
+#       type: loki
+#       uid: loki
+#       url: http://loki:3100
+#       access: proxy
+#       jsonData:
+#         maxLines: 1000
+#     - name: Tempo
+#       type: tempo
+#       uid: tempo
+#       url: http://tempo.monitoring.svc.cluster.local:3200
+#       access: proxy
+
+#   # 3. Expose via AWS Load Balancer
+#   ingress:
+#     enabled: true
+#     ingressClassName: alb
+#     annotations:
+#       alb.ingress.kubernetes.io/scheme: internet-facing
+#       alb.ingress.kubernetes.io/target-type: ip
+#       # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+#     hosts:
+#       - grafana.example.com
+#     paths:
+#       - /
 
 prometheus:
   prometheusSpec:
     serviceMonitorSelectorNilUsesHelmValues: false
-    serviceMonitorSelector: 
-      matchLabels:
-        release: prometheus
-    
-    # Enable Persistence for EKS
+    serviceMonitorSelector: {}
+    podMonitorSelector: {}
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: gp3
+          storageClassName: "gp2"   # your EBS CSI storage class
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 50Gi
+              storage: 2Gi           # adjust size as needed
 
-# Grafana Configuration for EKS
 grafana:
-  # 1. Persistence: Save dashboards/users to EBS
+  enabled: true
+  adminUser: admin
+  adminPassword: admin123
+  defaultDashboardsEnabled: false
   persistence:
     enabled: true
-    type: pvc
-    storageClassName: gp3
+    storageClassName: "gp2"     # same EBS storage class
     accessModes:
       - ReadWriteOnce
-    size: 10Gi
+    size: 2Gi                       # adjust size as needed
+  service:
+    type: ClusterIP
+    port: 80
 
-  # 2. Auto-configure Sources (EKS is a fresh install, so no conflict)
-  additionalDataSources:
-    - name: Loki
-      type: loki
-      uid: loki
-      url: http://loki:3100
-      access: proxy
-      jsonData:
-        maxLines: 1000
-    - name: Tempo
-      type: tempo
-      uid: tempo
-      url: http://tempo.monitoring.svc.cluster.local:3200
-      access: proxy
+alertmanager:
+  alertmanagerSpec:
+    replicas: 1
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: "gp2"
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 2Gi           # adjust size as needed
 
-  # 3. Expose via AWS Load Balancer
-  ingress:
-    enabled: true
-    ingressClassName: alb
-    annotations:
-      alb.ingress.kubernetes.io/scheme: internet-facing
-      alb.ingress.kubernetes.io/target-type: ip
-      # alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
-    hosts:
-      - grafana.example.com
-    paths:
-      - /
+nodeExporter:
+  enabled: true
+
+kubeStateMetrics:
+  enabled: true
+
+prometheusOperator:
+  createCustomResource: true
+  serviceAccount:
+    create: true
