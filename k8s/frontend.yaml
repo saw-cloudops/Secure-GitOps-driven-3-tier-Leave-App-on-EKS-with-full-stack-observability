@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: registry.gitlab.com/hlaingminpaing/3-tier-leave-management-system/frontend:
+        image: registry.gitlab.com/hlaingminpaing/3-tier-leave-management-system/frontend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
