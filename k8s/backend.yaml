@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: ghcr.io/hlaingminpaing/3-tier-leave-management-system/backend:sha-027f465
+        image: registry.gitlab.com/hlaingminpaing/3-tier-leave-management-system/backend:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
@@ -74,3 +74,4 @@ spec:
       targetPort: 9464
       name: metrics-otel
   type: ClusterIP
+
