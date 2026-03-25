@@ -10,9 +10,9 @@ spec:
   - Ingress
   ingress:
   - from:
-    - podSelector:
-      matchLabels:
-        app: backend
+    - podSelector: # ဒီနေရာမှာ error ပြနေတာ
+        matchLabels:
+          app: backend
     ports:
     - protocol: TCP
       port: 3306
