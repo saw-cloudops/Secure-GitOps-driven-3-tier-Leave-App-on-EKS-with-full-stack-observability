@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: registry.gitlab.com/sawcloudops30/3_tier_leave_management_app/backend:d7cb30d4
+        image: registry.gitlab.com/sawcloudops30/3_tier_leave_management_app/backend:6768dea9
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
