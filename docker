@@ -6,6 +6,6 @@ docker run -d \
   mysql:8
 
 
-docker exec -it mysql mysql -uroot -proot leave_db
+docker exec -it mysql mysql -u root -proot leave_db
 
 docker exec -it mysql mysql -uroot -proot leave_db -e "UPDATE users SET role='ADMIN' WHERE username='yourusername';"
