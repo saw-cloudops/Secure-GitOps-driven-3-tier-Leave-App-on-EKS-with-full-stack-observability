@@ -14,7 +14,7 @@ metadata:
 spec:
   # ingressClassName: alb
   rules:
-    - host: grafana.myanmartechsolutions.site
+    - host: grafana.cloudstackmm.site
       http:
         paths:
           - path: /
