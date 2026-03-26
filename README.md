@@ -540,10 +540,26 @@ This project is open-source and available under the [MIT License](LICENSE).
 
 ---
 
-<div align="center">
+## 👤 About the Author
+
+| | |
+|---|---|
+| **Name** | Aung Saw Hein |
+| **Role** | Aspiring Cloud DevOps Engineer |
+| **Location** | Yangon, Myanmar 🇲🇲 |
+| **LinkedIn** | [linkedin.com/in/aung-saw-hein-47a616225](https://www.linkedin.com/in/aung-saw-hein-47a616225/) |
+| **GitHub** | [github.com/saw-cloudops](https://github.com/saw-cloudops) |
+| **Email** | saw.cloudops30@gmail.com |
+
+---
 
 **Built with ❤️ using AWS EKS · GitLab CI · ArgoCD · OpenTelemetry · Grafana**
 
-*Demonstrating production-grade DevOps practices*
+*Demonstrating production-grade DevOps practices by [Aung Saw Hein](https://www.linkedin.com/in/aung-saw-hein-47a616225/)*
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat&logo=linkedin)](https://www.linkedin.com/in/aung-saw-hein-47a616225/)
+[![GitHub](https://img.shields.io/badge/GitHub-saw--cloudops-black?style=flat&logo=github)](https://github.com/saw-cloudops)
+
+<div align="center">
 
 </div>
