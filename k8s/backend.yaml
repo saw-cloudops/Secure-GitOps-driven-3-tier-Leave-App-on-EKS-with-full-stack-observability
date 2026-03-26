@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: backend
-        image: registry.gitlab.com/sawcloudops30/3_tier_leave_management_app/backend:92d4c5e9
+        image: ghcr.io/saw-cloudops/Secure-GitOps-driven-3-tier-Leave-App-on-EKS-with-full-stack-observability/backend:sha-0c3ae46
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
