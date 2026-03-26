@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: ghcr.io/saw-cloudops/Secure-GitOps-driven-3-tier-Leave-App-on-EKS-with-full-stack-observability/frontend:sha-0c3ae46
+        image: ghcr.io/saw-cloudops/Secure-GitOps-driven-3-tier-Leave-App-on-EKS-with-full-stack-observability/frontend:sha-ded53ae
         imagePullPolicy: Always
         ports:
         - containerPort: 80
