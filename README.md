@@ -394,8 +394,8 @@ All routes prefixed with `/api`. Protected routes require `Authorization: Bearer
 
 ### 1. Clone the repo
 ```bash
-git clone https://gitlab.com/sawcloudops30/3_tier_leave_management_app.git
-cd 3-tier-leave-management-system
+git clone https://github.com/saw-cloudops/Secure-GitOps-driven-3-tier-Leave-App-on-EKS-with-full-stack-observability.git
+cd saw-cloudops/Secure-GitOps-driven-3-tier-Leave-App-on-EKS-with-full-stack-observability
 ```
 
 ### 2. Run the backend
